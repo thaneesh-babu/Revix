@@ -10,10 +10,10 @@ This model uses deep generative models to produce music in the raw audio space, 
 
 Music in the raw audio space can be represented as a continuous waveform x ∈ [−1, 1]<sup>T</sup>, where T = audio duration \* sampling rate (∈ [16 kHz, 48 kHz]). Hence, learning a generative model for music is computationally intensive, as the input vector would be insanely long for a multi-minute snippet.
 
-## Autoencoders
+## Autoencoders (AE)
 
-These encoders, in short, convert information (images/videos/audio and the like) to a lower dimension space through a latent vector and decode it back to the original dimension. The goal is to minimize the loss as much as possible, usually used with the MSE loss.
+These encoders, in short, convert information (images/videos/audio and the like, which would be an input vector of significantly high dimension) to a lower dimension space through a latent vector and decode it back to the original dimension. The goal is to minimize the loss as much as possible, usually used with the MSE loss.
 
 ## Variation Autoencoders (VAE)
 
-These overcome the limitations of AEs by regularizing the latent space to make it more continous and generative more meaningful samples.
+These overcome the limitations of AEs by regularizing the latent space to make it more continous and generative more meaningful samples. This entails forming the mean vector and standard deviation vector from the input vector and sampling from it to the decoder.
