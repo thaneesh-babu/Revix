@@ -17,3 +17,12 @@ These encoders, in short, convert information (images/videos/audio and the like,
 ## Variation Autoencoders (VAE)
 
 These overcome the limitations of AEs by regularizing the latent space to make it more continous and generative more meaningful samples. This entails forming the mean vector and standard deviation vector from the input vector and sampling from it to the decoder.
+
+## Vector-Quantized Variation Autoencoders (VQ-VAE)
+
+This form of VAE relies on vector quantization, and differs from VAE's in that the encoder network outputs discrete rather than continuous codes.
+
+- ### Embedding space and Latent variables
+    In VQ-VAE, a latent embedding space is defined: e ∈ R<sup>K×D</sup> (K = size of the discrete latent space; D = dimensionality of each latent embedding vector), resulting in K embedding vector, each of dimension D. The discrete latent variables _z_ are calculated by finding the nearest neighbor in the embedding space, which becomes the input to the decoder
+- ### Learning
+    After the output of the gradient is mapped to the nearest point, the gradient will alter the output. During forward pass, the nearest neighbor in the embedding space is passed to the decoder whereas in the backward pass, the gradient is passed to the encoder, so that the latter can change its output to lower the reconstruction loss. A commit loss is also added to prevent the encodings from fluctuating too much.
