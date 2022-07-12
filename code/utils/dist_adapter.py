@@ -38,7 +38,6 @@ def get_world_size():
 def barrier():
     if is_available():
         return _barrier()
-    # else: do nothing
 
 
 def all_gather(tensor_list, tensor):
@@ -51,25 +50,21 @@ def all_gather(tensor_list, tensor):
 def all_reduce(tensor, op=ReduceOp.SUM):
     if is_available():
         return _all_reduce(tensor, op)
-    # else: do nothing
 
 
 def reduce(tensor, dst, op=ReduceOp.SUM):
     if is_available():
         return _reduce(tensor, dst, op)
-    # else: do nothing
 
 
 def broadcast(tensor, src):
     if is_available():
         return _broadcast(tensor, src)
-    # else: do nothing
 
 
 def init_process_group(backend, init_method):
     if is_available():
         return _init_process_group(backend, init_method)
-    # else: do nothing
 
 
 def _get_rank():
