@@ -71,7 +71,6 @@ def _setup_dist_from_mpi(master_addr, backend, port, n_attempts, verbose):
     os.environ["NCCL_NSOCKS_PERTHREAD"] = "2"
     os.environ["NCCL_SOCKET_NTHREADS"] = "8"
 
-    # Pin this rank to a specific GPU on the node
     local_rank = mpi_rank % 8
     if torch.cuda.is_available():
         torch.cuda.set_device(local_rank)
@@ -80,14 +79,20 @@ def _setup_dist_from_mpi(master_addr, backend, port, n_attempts, verbose):
         print(f"Connecting to master_addr: {master_addr}")
 
     for attempt_idx in range(n_attempts):
-        dist.init_process_group(backend=backend, init_method=f"env://")
-        assert dist.get_rank() == mpi_rank
+        try:
+            dist.init_process_group(backend=backend, init_method=f"env://")
+            assert dist.get_rank() == mpi_rank
 
-        use_cuda = torch.cuda.is_available()
-        print(f'Using cuda {use_cuda}')
-        local_rank = mpi_rank % 8
-        device = torch.device("cuda", local_rank) if use_cuda else torch.device("cpu")
-        torch.cuda.set_device(local_rank)
+            use_cuda = torch.cuda.is_available()
+            print(f'Using cuda {use_cuda}')
+            local_rank = mpi_rank % 8
+            device = torch.device("cuda", local_rank) if use_cuda else torch.device("cpu")
+            torch.cuda.set_device(local_rank)
 
-        return mpi_rank, local_rank, device
-        
+            return mpi_rank, local_rank, device
+        except RuntimeError as e:
+            print(f"Caught error during initialization (attempt {attempt_idx} of {n_attempts}): {e}")
+            sleep(1 + (0.01 * mpi_rank))  
+            pass
+
+    raise RuntimeError("Failed to initialize NCCL")
