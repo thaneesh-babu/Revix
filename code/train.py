@@ -8,18 +8,18 @@ import fire
 import warnings
 import numpy as np
 import torch as t
-import jukebox.utils.dist_adapter as dist
+import code.utils.dist_adapter as dist
 from torch.nn.parallel import DistributedDataParallel
 
-from jukebox.hparams import setup_hparams
-from jukebox.make_models import make_vqvae, make_prior, restore_opt, save_checkpoint
-from jukebox.utils.logger import init_logging
-from jukebox.utils.audio_utils import audio_preprocess, audio_postprocess
-from jukebox.utils.torch_utils import zero_grad, count_parameters
-from jukebox.utils.dist_utils import print_once, allreduce, allgather
-from jukebox.utils.ema import CPUEMA, FusedEMA, EMA
-from jukebox.utils.fp16 import FP16FusedAdam, FusedAdam, LossScalar, clipped_grad_scale, backward
-from jukebox.data.data_processor import DataProcessor
+from code.hparams import setup_hparams
+from code.make_models import make_vqvae, make_prior, restore_opt, save_checkpoint
+from code.utils.logger import init_logging
+from code.utils.audio_utils import audio_preprocess, audio_postprocess
+from code.utils.torch_utils import zero_grad, count_parameters
+from code.utils.dist_utils import print_once, allreduce, allgather
+from code.utils.ema import CPUEMA, FusedEMA, EMA
+from code.utils.fp16 import FP16FusedAdam, FusedAdam, LossScalar, clipped_grad_scale, backward
+from code.data.data_processor import DataProcessor
 
 def prepare_aud(x, hps):
     x = audio_postprocess(x.detach().contiguous(), hps)
@@ -292,7 +292,7 @@ def train(model, orig_model, opt, shd, scalar, ema, logger, metrics, data_proces
     return {key: metrics.avg(key) for key in _metrics.keys()}
 
 def run(hps="teeny", port=29500, **kwargs):
-    from jukebox.utils.dist_utils import setup_dist_from_mpi
+    from code.utils.dist_utils import setup_dist_from_mpi
     rank, local_rank, device = setup_dist_from_mpi(port=port)
     hps = setup_hparams(hps, kwargs)
     hps.ngpus = dist.get_world_size()

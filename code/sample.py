@@ -1,16 +1,16 @@
 import os
 import torch as t
-import jukebox.utils.dist_adapter as dist
+import code.utils.dist_adapter as dist
 
-from jukebox.hparams import Hyperparams
-from jukebox.data.labels import EmptyLabeller
-from jukebox.utils.torch_utils import empty_cache
-from jukebox.utils.audio_utils import save_wav, load_audio
-from jukebox.make_models import make_model
-from jukebox.align import get_alignment
-from jukebox.save_html import save_html
-from jukebox.utils.sample_utils import split_batch, get_starts
-from jukebox.utils.dist_utils import print_once
+from code.hparams import Hyperparams
+from code.data.labels import EmptyLabeller
+from code.utils.torch_utils import empty_cache
+from code.utils.audio_utils import save_wav, load_audio
+from code.make_models import make_model
+from code.align import get_alignment
+from code.save_html import save_html
+from code.utils.sample_utils import split_batch, get_starts
+from code.utils.dist_utils import print_once
 import fire
 
 # Sample a partial window of length<n_ctx with tokens_to_sample new tokens on level=level
@@ -48,7 +48,7 @@ def sample_single_window(zs, labels, sampling_kwargs, level, prior, start, hps):
     if new_tokens <= 0:
         # Nothing new to sample
         return zs
-    
+
     # get z_conds from level above
     z_conds = prior.get_z_conds(zs, start, end)
 
@@ -177,7 +177,7 @@ def load_codes(codes_file, duration, priors, hps):
 # Generate and save samples, alignment, and webpage for visualization.
 def save_samples(model, device, hps, sample_hps):
     print(hps)
-    from jukebox.lyricdict import poems, gpt_2_lyrics
+    from code.lyricdict import poems, gpt_2_lyrics
     vqvae, priors = make_model(model, device, hps)
 
     assert hps.sample_length//priors[-2].raw_to_tokens >= priors[-2].n_ctx, f"Upsampling needs atleast one ctx in get_z_conds. Please choose a longer sample length"
@@ -267,7 +267,7 @@ def save_samples(model, device, hps, sample_hps):
 
 
 def run(model, mode='ancestral', codes_file=None, audio_file=None, prompt_length_in_seconds=None, port=29500, **kwargs):
-    from jukebox.utils.dist_utils import setup_dist_from_mpi
+    from code.utils.dist_utils import setup_dist_from_mpi
     rank, local_rank, device = setup_dist_from_mpi(port=port)
     hps = Hyperparams(**kwargs)
     sample_hps = Hyperparams(dict(mode=mode, codes_file=codes_file, audio_file=audio_file, prompt_length_in_seconds=prompt_length_in_seconds))

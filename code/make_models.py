@@ -6,12 +6,12 @@ Test on dummy outputs to see if everything matches
 import os
 import numpy as np
 import torch as t
-import jukebox.utils.dist_adapter as dist
-from jukebox.hparams import Hyperparams, setup_hparams, REMOTE_PREFIX
-from jukebox.utils.remote_utils import download
-from jukebox.utils.torch_utils import freeze_model
-from jukebox.utils.dist_utils import print_all
-from jukebox.vqvae.vqvae import calculate_strides
+import code.utils.dist_adapter as dist
+from code.hparams import Hyperparams, setup_hparams, REMOTE_PREFIX
+from code.utils.remote_utils import download
+from code.utils.torch_utils import freeze_model
+from code.utils.dist_utils import print_all
+from code.vqvae.vqvae import calculate_strides
 import fire
 
 MODELS = {
@@ -71,7 +71,7 @@ def restore_opt(opt, shd, checkpoint_path):
         shd.step(checkpoint['step'])
 
 def make_vqvae(hps, device='cuda'):
-    from jukebox.vqvae.vqvae import VQVAE
+    from code.vqvae.vqvae import VQVAE
     block_kwargs = dict(width=hps.width, depth=hps.depth, m_conv=hps.m_conv,
                         dilation_growth_rate=hps.dilation_growth_rate,
                         dilation_cycle=hps.dilation_cycle,
@@ -110,7 +110,7 @@ def make_vqvae(hps, device='cuda'):
     return vqvae
 
 def make_prior(hps, vqvae, device='cuda'):
-    from jukebox.prior.prior import SimplePrior
+    from code.prior.prior import SimplePrior
 
     prior_kwargs = dict(input_shape=(hps.n_ctx,), bins=vqvae.l_bins,
                         width=hps.prior_width, depth=hps.prior_depth, heads=hps.heads,
@@ -173,7 +173,7 @@ def make_prior(hps, vqvae, device='cuda'):
 
     if hps.fp16_params:
         print_all("Converting to fp16 params")
-        from jukebox.transformer.ops import _convert_conv_weights_to_fp16
+        from code.transformer.ops import _convert_conv_weights_to_fp16
         prior.apply(_convert_conv_weights_to_fp16)
     prior = prior.to(device)
     restore_model(hps, prior, hps.restore_prior)
@@ -243,7 +243,7 @@ def save_outputs(model, device, hps):
 
 
 def run(model, port=29500, **kwargs):
-    from jukebox.utils.dist_utils import setup_dist_from_mpi
+    from code.utils.dist_utils import setup_dist_from_mpi
     rank, local_rank, device = setup_dist_from_mpi(port=port)
     hps = Hyperparams(**kwargs)
 
